@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan Diario de Clase - Medio Social | Colegio Montano</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        montano: {
+                            primary: '#1F3C88',   // Azul institucional
+                            secondary: '#3F72AF', // Azul secundario
+                            white: '#FFFFFF',     // Blanco
+                            accent: '#F2C94C'     // Amarillo institucional
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Segoe UI', 'Tahoma', 'Verdana', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFFFFF;
+            color: #1e293b;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Estilos para campos editables */
+        [contenteditable="true"] {
+            outline: none;
+            border-bottom: 1.5px dashed #3F72AF;
+            padding: 2px 6px;
+            border-radius: 6px;
+            transition: background-color 0.2s, border-color 0.2s;
+            min-width: 40px;
+            display: inline-block;
+        }
+        [contenteditable="true"]:hover {
+            background-color: rgba(242, 201, 76, 0.18);
+            border-bottom-color: #1F3C88;
+        }
+        [contenteditable="true"]:focus {
+            background-color: rgba(242, 201, 76, 0.28);
+            border: 1.5px solid #1F3C88;
+            box-shadow: 0 0 0 3px rgba(31, 60, 136, 0.12);
+        }
+
+        .editable-block[contenteditable="true"] {
+            display: block;
+            width: 100%;
+            border: 1.5px dashed #3F72AF;
+            padding: 10px 12px;
+            background-color: #FFFFFF;
+        }
+        .editable-block[contenteditable="true"]:focus {
+            border: 1.5px solid #1F3C88;
+        }
+
+        /* Tarjetas institucionales */
+        .inst-card {
+            background-color: #FFFFFF;
+            border: 2px solid #3F72AF;
+            border-radius: 1rem;
+            box-shadow: 0 4px 14px rgba(31, 60, 136, 0.07);
+        }
+
+        /* Pestañas de secuencia didáctica */
+        .seq-tab {
+            transition: all 0.2s ease;
+            border: 2px solid #3F72AF;
+            background-color: #FFFFFF;
+            color: #1F3C88;
+        }
+        .seq-tab:hover {
+            background-color: rgba(63, 114, 175, 0.08);
+        }
+        .seq-tab.active {
+            background-color: #1F3C88;
+            color: #FFFFFF;
+            border-color: #1F3C88;
+            box-shadow: 0 4px 12px rgba(31, 60, 136, 0.25);
+        }
+        .seq-tab.active .time-pill {
+            background-color: #F2C94C;
+            color: #1F3C88;
+        }
+
+        /* Estilos exclusivos de impresión / PDF */
+        @media print {
+            body {
+                background-color: #FFFFFF !important;
+                color: #000000 !important;
+                font-size: 11pt;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .tab-panel {
+                display: block !important;
+                margin-bottom: 16px !important;
+                page-break-inside: avoid;
+            }
+            .inst-card {
+                border: 1.5px solid #1F3C88 !important;
+                box-shadow: none !important;
+                margin-bottom: 12px !important;
+                page-break-inside: avoid;
+            }
+            [contenteditable="true"] {
+                border: none !important;
+                padding: 0 !important;
+            }
+            .editable-block[contenteditable="true"] {
+                border: 1px solid #3F72AF !important;
+                padding: 8px !important;
+            }
+            header {
+                position: static !important;
+                background: #1F3C88 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .print-badge {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- BARRA DE NOTIFICACIONES (TOAST) -->
+    <div id="toast-banner" class="fixed bottom-5 right-5 z-50 hidden bg-[#1F3C88] text-white px-4 py-3 rounded-xl shadow-xl border-2 border-[#F2C94C] flex items-center gap-2.5 text-xs md:text-sm font-bold no-print">
+        <i class="fa-solid fa-circle-check text-[#F2C94C] text-base"></i>
+        <span id="toast-message">Cambios guardados correctamente.</span>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN PARA REINICIAR CAMPOS -->
+    <div id="reset-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 border-2 border-[#1F3C88] shadow-2xl space-y-4">
+            <div class="flex items-center gap-3 text-[#1F3C88]">
+                <div class="w-10 h-10 rounded-xl bg-[#F2C94C] text-[#1F3C88] flex items-center justify-center text-xl font-black">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </div>
+                <h3 class="font-extrabold text-lg">Restablecer Planificación</h3>
+            </div>
+            <p class="text-sm text-slate-700 leading-relaxed">
+                ¿Estás seguro de que deseas restablecer todos los campos editables y la lista de cotejo a sus valores originales de la plantilla?
+            </p>
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button onclick="closeResetModal()" class="px-4 py-2 rounded-xl border-2 border-[#3F72AF] text-[#1F3C88] font-bold text-xs md:text-sm hover:bg-slate-100 transition">
+                    Cancelar
+                </button>
+                <button onclick="confirmResetPlan()" class="px-4 py-2 rounded-xl bg-[#1F3C88] text-white font-bold text-xs md:text-sm hover:bg-[#3F72AF] transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-check text-[#F2C94C]"></i>
+                    <span>Sí, Restablecer</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 1. ENCABEZADO INSTITUCIONAL Y DATOS EDITABLES                         -->
+    <!-- ===================================================================== -->
+    <header class="bg-[#1F3C88] text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <!-- Identidad Visual Colegio Montano -->
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-1.5 rounded-xl shadow flex items-center justify-center">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyEop0yf6lZ7Jk9MILZxF1rBj4Oqs5esyhIQ&s" 
+                         alt="Logo Colegio Montano" 
+                         class="h-11 w-auto object-contain"
+                         onerror="this.src='https://placehold.co/120x48/1F3C88/FFFFFF?text=MONTANO'">
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="font-extrabold text-lg md:text-xl tracking-wide">COLEGIO MONTANO</h1>
+                        <span class="print-badge bg-[#F2C94C] text-[#1F3C88] text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase">
+                            Planificación Diaria • Modalidad Presencial
+                        </span>
+                    </div>
+                    <p class="text-xs text-blue-100 mt-0.5">
+                        Modelo Pedagógico Institucional • Alineado al CNB de Guatemala
+                    </p>
+                </div>
+            </div>
+
+            <!-- Controles Interactivos del Docente -->
+            <div class="flex flex-wrap items-center gap-2 no-print">
+                <button onclick="savePlanToStorage(true)" title="Guardar cambios en el navegador" class="bg-[#3F72AF] hover:bg-blue-600 text-white font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1.5 border border-white/20">
+                    <i class="fa-solid fa-floppy-disk text-[#F2C94C]"></i>
+                    <span>Guardar</span>
+                </button>
+                <button onclick="openResetModal()" title="Restablecer campos editables" class="bg-white/15 hover:bg-white/25 text-white font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1.5 border border-white/20">
+                    <i class="fa-solid fa-rotate-left text-[#F2C94C]"></i>
+                    <span class="hidden sm:inline">Reiniciar</span>
+                </button>
+                <button onclick="window.print()" title="Imprimir o Guardar como PDF" class="bg-white text-[#1F3C88] hover:bg-slate-100 font-extrabold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-print text-[#3F72AF]"></i>
+                    <span>Imprimir / PDF</span>
+                </button>
+                <button onclick="exportHTMLFile()" title="Descargar archivo HTML con los datos editados" class="bg-[#3F72AF] hover:bg-blue-600 text-white font-bold px-3 py-2 rounded-xl text-xs transition flex items-center gap-1.5 border border-[#F2C94C]">
+                    <i class="fa-solid fa-file-arrow-down text-[#F2C94C]"></i>
+                    <span>Descargar HTML</span>
+                </button>
+                <button onclick="toggleFullscreen()" id="fullscreen-btn" title="Ampliar a Pantalla Completa para proyección" class="bg-[#F2C94C] hover:bg-yellow-300 text-[#1F3C88] font-black px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow">
+                    <i id="fullscreen-icon" class="fa-solid fa-expand"></i>
+                    <span id="fullscreen-text" class="hidden md:inline">Pantalla Completa</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-6 space-y-6">
+
+        <!-- FICHA DE DATOS GENERALES EDITABLES -->
+        <section class="inst-card p-5 md:p-6">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#F2C94C] pb-3 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-lg bg-[#1F3C88] text-[#F2C94C] flex items-center justify-center font-black text-sm">1</span>
+                    <h2 class="text-base md:text-lg font-extrabold text-[#1F3C88] uppercase tracking-wide">Datos Generales de la Clase</h2>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-[#3F72AF] font-semibold no-print">
+                    <i class="fa-solid fa-pen-to-square text-[#1F3C88]"></i>
+                    <span>Haz clic sobre cualquier dato para editarlo directamente</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 text-xs md:text-sm">
+                <div class="p-3 rounded-xl border border-[#3F72AF]/40 bg-white">
+                    <span class="text-[11px] font-bold uppercase text-[#3F72AF] block">Colegio</span>
+                    <span id="field-colegio" data-field="colegio" contenteditable="true" class="font-extrabold text-[#1F3C88] mt-0.5">Montano</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF]/40 bg-white">
+                    <span class="text-[11px] font-bold uppercase text-[#3F72AF] block">Modalidad</span>
+                    <span id="field-modalidad" data-field="modalidad" contenteditable="true" class="font-extrabold text-[#1F3C88] mt-0.5">Presencial</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF]/40 bg-white">
+                    <span class="text-[11px] font-bold uppercase text-[#3F72AF] block">Materia / Área</span>
+                    <span id="field-materia" data-field="materia" contenteditable="true" class="font-extrabold text-[#1F3C88] mt-0.5">Medio Social</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF]/40 bg-white lg:col-span-2">
+                    <span class="text-[11px] font-bold uppercase text-[#3F72AF] block">Tema de la Sesión</span>
+                    <span id="field-tema" data-field="tema" contenteditable="true" class="font-extrabold text-[#1F3C88] mt-0.5">Las personas y su identidad</span>
+                </div>
+
+                <div class="p-3 rounded-xl border border-[#3F72AF]/40 bg-white">
+                    <span class="text-[11px] font-bold uppercase text-[#3F72AF] block">Grado</span>
+                    <span id="field-grado" data-field="grado" contenteditable="true" class="font-extrabold text-[#1F3C88] mt-0.5">Segundo Primaria</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF]/40 bg-white">
+                    <span class="text-[11px] font-bold uppercase text-[#3F72AF] block">Unidad</span>
+                    <span id="field-unidad" data-field="unidad" contenteditable="true" class="font-extrabold text-[#1F3C88] mt-0.5">1</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF]/40 bg-white">
+                    <span class="text-[11px] font-bold uppercase text-[#3F72AF] block">Número de Plan</span>
+                    <span id="field-numplan" data-field="numplan" contenteditable="true" class="font-extrabold text-[#1F3C88] mt-0.5">Plan No. 1</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF]/40 bg-white">
+                    <span class="text-[11px] font-bold uppercase text-[#3F72AF] block">Fecha</span>
+                    <span id="field-fecha" data-field="fecha" contenteditable="true" class="font-extrabold text-[#1F3C88] mt-0.5">Febrero-Marzo 2027</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF]/40 bg-white">
+                    <span class="text-[11px] font-bold uppercase text-[#3F72AF] block">Docente</span>
+                    <span id="field-docente" data-field="docente" contenteditable="true" class="font-extrabold text-[#1F3C88] mt-0.5">Gloria Rodríguez</span>
+                </div>
+            </div>
+
+            <!-- Indicador Visual Exacto de Duración Total (60 Minutos) -->
+            <div class="mt-4 p-3.5 rounded-xl bg-[#1F3C88] text-white flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-clock text-[#F2C94C] text-lg"></i>
+                    <span class="font-extrabold text-xs md:text-sm uppercase tracking-wide">Distribución Exacta del Tiempo de Clase:</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+                    <span class="px-2.5 py-1 rounded-lg bg-[#3F72AF] border border-white/20">IM: 10 min</span>
+                    <span>+</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-[#3F72AF] border border-white/20">TP: 20 min</span>
+                    <span>+</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-[#3F72AF] border border-white/20">TC: 20 min</span>
+                    <span>+</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-[#3F72AF] border border-white/20">P: 10 min</span>
+                    <span>=</span>
+                    <span class="print-badge px-3 py-1 rounded-lg bg-[#F2C94C] text-[#1F3C88] font-black">TOTAL: 60 MINUTOS</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- 2. COMPETENCIA Y LOGRO DE APRENDIZAJE                                 -->
+        <!-- ===================================================================== -->
+        <section class="inst-card p-5 md:p-6">
+            <div class="flex items-center gap-2.5 border-b-2 border-[#F2C94C] pb-3 mb-4">
+                <span class="w-8 h-8 rounded-lg bg-[#1F3C88] text-[#F2C94C] flex items-center justify-center font-black text-sm">2</span>
+                <h2 class="text-base md:text-lg font-extrabold text-[#1F3C88] uppercase tracking-wide">Competencia y Logro de Aprendizaje (CNB Guatemala)</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 rounded-xl border-2 border-[#3F72AF] bg-white space-y-2">
+                    <div class="flex items-center gap-2 text-[#1F3C88] font-extrabold text-sm">
+                        <i class="fa-solid fa-bullseye text-[#F2C94C] bg-[#1F3C88] p-1.5 rounded-lg text-xs"></i>
+                        <span>Competencia de Aprendizaje</span>
+                    </div>
+                    <div id="field-competencia" data-field="competencia" contenteditable="true" class="editable-block text-xs md:text-sm text-slate-800 leading-relaxed">
+                        Relaciona los rasgos físicos, emocionales, familiares y culturales que conforman su identidad personal con el respeto y la valoración hacia las demás personas de su entorno escolar y comunitario.
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl border-2 border-[#3F72AF] bg-white space-y-2">
+                    <div class="flex items-center gap-2 text-[#1F3C88] font-extrabold text-sm">
+                        <i class="fa-solid fa-flag-checkered text-[#F2C94C] bg-[#1F3C88] p-1.5 rounded-lg text-xs"></i>
+                        <span>Logro de Aprendizaje (Observable y Medible en 60 min)</span>
+                    </div>
+                    <div id="field-logro" data-field="logro" contenteditable="true" class="editable-block text-xs md:text-sm text-slate-800 leading-relaxed">
+                        Al finalizar los 60 minutos, el estudiante identifica y representa al menos cuatro elementos de su identidad personal (nombre, historia familiar, gustos y cualidades) en un mapa individual y compara semejanzas y diferencias con su equipo mediante un mural cooperativo respetuoso.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- 3. COMPETENCIAS CLAVE Y BLANDAS A DESARROLLAR                         -->
+        <!-- ===================================================================== -->
+        <section class="inst-card p-5 md:p-6">
+            <div class="flex items-center gap-2.5 border-b-2 border-[#F2C94C] pb-3 mb-4">
+                <span class="w-8 h-8 rounded-lg bg-[#1F3C88] text-[#F2C94C] flex items-center justify-center font-black text-sm">3</span>
+                <h2 class="text-base md:text-lg font-extrabold text-[#1F3C88] uppercase tracking-wide">Competencias Clave y Competencias Blandas</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <!-- Competencias Clave -->
+                <div class="p-4 rounded-xl border border-[#3F72AF] bg-white space-y-3">
+                    <h3 class="font-extrabold text-sm text-[#3F72AF] uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-brain text-[#1F3C88]"></i>
+                        <span>Competencias Clave Seleccionadas</span>
+                    </h3>
+                    <div class="space-y-2.5 text-xs md:text-sm">
+                        <div class="p-2.5 rounded-lg border-l-4 border-[#1F3C88] bg-slate-50/70">
+                            <strong class="text-[#1F3C88]">Pensamiento crítico:</strong>
+                            <span data-field="cc-critico" contenteditable="true" class="text-slate-700"> Analiza qué características lo hacen único y cuáles comparte con sus compañeros sin emitir juicios.</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg border-l-4 border-[#3F72AF] bg-slate-50/70">
+                            <strong class="text-[#1F3C88]">Creatividad:</strong>
+                            <span data-field="cc-creatividad" contenteditable="true" class="text-slate-700"> Diseña su Mapa de Identidad Única con símbolos, colores y dibujos originales.</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg border-l-4 border-[#F2C94C] bg-slate-50/70">
+                            <strong class="text-[#1F3C88]">Resolución de problemas:</strong>
+                            <span data-field="cc-problemas" contenteditable="true" class="text-slate-700"> Resuelve en equipo cómo organizar en un solo mural las diferencias y coincidencias de cuatro integrantes.</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg border-l-4 border-[#1F3C88] bg-slate-50/70">
+                            <strong class="text-[#1F3C88]">Trabajo en equipo:</strong>
+                            <span data-field="cc-equipo" contenteditable="true" class="text-slate-700"> Cumple un rol específico dentro de su grupo asignado para construir el producto colectivo.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Competencias Blandas -->
+                <div class="p-4 rounded-xl border border-[#3F72AF] bg-white space-y-3">
+                    <h3 class="font-extrabold text-sm text-[#3F72AF] uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-heart-pulse text-[#1F3C88]"></i>
+                        <span>Competencias Blandas (Socioemocionales)</span>
+                    </h3>
+                    <div class="space-y-2.5 text-xs md:text-sm">
+                        <div class="p-2.5 rounded-lg border-l-4 border-[#F2C94C] bg-slate-50/70">
+                            <strong class="text-[#1F3C88]">Inteligencia emocional:</strong>
+                            <span data-field="cb-emocional" contenteditable="true" class="text-slate-700"> Reconoce y expresa con orgullo sus cualidades personales, emociones y raíces familiares.</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg border-l-4 border-[#1F3C88] bg-slate-50/70">
+                            <strong class="text-[#1F3C88]">Comunicación:</strong>
+                            <span data-field="cb-comunicacion" contenteditable="true" class="text-slate-700"> Escucha activamente la historia de sus compañeros y expone sus ideas con claridad y cortesía.</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg border-l-4 border-[#3F72AF] bg-slate-50/70">
+                            <strong class="text-[#1F3C88]">Toma de decisiones:</strong>
+                            <span data-field="cb-decisiones" contenteditable="true" class="text-slate-700"> Selecciona los datos más significativos de su historia personal para compartirlos en clase.</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg border-l-4 border-[#F2C94C] bg-slate-50/70">
+                            <strong class="text-[#1F3C88]">Flexibilidad:</strong>
+                            <span data-field="cb-flexibilidad" contenteditable="true" class="text-slate-700"> Se integra positivamente a equipos organizados por la docente, valorando gustos distintos a los propios.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- 4. HÁBITOS DEL MODELO FORMATIVO MONTANO                               -->
+        <!-- ===================================================================== -->
+        <section class="inst-card p-5 md:p-6">
+            <div class="flex items-center gap-2.5 border-b-2 border-[#F2C94C] pb-3 mb-4">
+                <span class="w-8 h-8 rounded-lg bg-[#1F3C88] text-[#F2C94C] flex items-center justify-center font-black text-sm">4</span>
+                <h2 class="text-base md:text-lg font-extrabold text-[#1F3C88] uppercase tracking-wide">Hábitos del Modelo Formativo Montano Integrados</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs md:text-sm">
+                <div class="p-3.5 rounded-xl border-2 border-[#3F72AF] bg-white">
+                    <span class="print-badge inline-block bg-[#F2C94C] text-[#1F3C88] font-black text-[11px] px-2.5 py-0.5 rounded-full mb-1.5">Hábito 1</span>
+                    <h3 class="font-extrabold text-[#1F3C88]">Ser proactivo</h3>
+                    <p data-field="habito-1" contenteditable="true" class="text-xs text-slate-700 mt-1 leading-relaxed">
+                        El estudiante prepara sus materiales con orden y asume con responsabilidad su turno y rol sin esperar recordatorios constantes.
+                    </p>
+                </div>
+
+                <div class="p-3.5 rounded-xl border-2 border-[#3F72AF] bg-white">
+                    <span class="print-badge inline-block bg-[#F2C94C] text-[#1F3C88] font-black text-[11px] px-2.5 py-0.5 rounded-full mb-1.5">Hábito 2</span>
+                    <h3 class="font-extrabold text-[#1F3C88]">Comenzar con un fin en mente</h3>
+                    <p data-field="habito-2" contenteditable="true" class="text-xs text-slate-700 mt-1 leading-relaxed">
+                        Antes de iniciar el trabajo personal, cada niño visualiza la meta de explicar quién es y por qué su identidad es valiosa.
+                    </p>
+                </div>
+
+                <div class="p-3.5 rounded-xl border-2 border-[#3F72AF] bg-white">
+                    <span class="print-badge inline-block bg-[#F2C94C] text-[#1F3C88] font-black text-[11px] px-2.5 py-0.5 rounded-full mb-1.5">Hábito 5</span>
+                    <h3 class="font-extrabold text-[#1F3C88]">Buscar primero entender, luego ser entendido</h3>
+                    <p data-field="habito-5" contenteditable="true" class="text-xs text-slate-700 mt-1 leading-relaxed">
+                        Durante el diálogo en equipo, los alumnos escuchan en silencio y con empatía la presentación de cada compañero antes de opinar.
+                    </p>
+                </div>
+
+                <div class="p-3.5 rounded-xl border-2 border-[#3F72AF] bg-white">
+                    <span class="print-badge inline-block bg-[#F2C94C] text-[#1F3C88] font-black text-[11px] px-2.5 py-0.5 rounded-full mb-1.5">Hábito 6</span>
+                    <h3 class="font-extrabold text-[#1F3C88]">Sinergizar</h3>
+                    <p data-field="habito-6" contenteditable="true" class="text-xs text-slate-700 mt-1 leading-relaxed">
+                        Los equipos combinan sus talentos de dibujo, redacción y expresión oral para crear un mural colectivo superior al trabajo individual.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- 5. SECUENCIA DIDÁCTICA INTERACTIVA (IM - TP - TC - P = 60 MINUTOS)    -->
+        <!-- ===================================================================== -->
+        <section class="inst-card p-5 md:p-6 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#F2C94C] pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-lg bg-[#1F3C88] text-[#F2C94C] flex items-center justify-center font-black text-sm">5</span>
+                    <div>
+                        <h2 class="text-base md:text-lg font-extrabold text-[#1F3C88] uppercase tracking-wide">Secuencia Didáctica Interactiva (60 Minutos)</h2>
+                        <p class="text-xs text-[#3F72AF] font-medium">Navega por cada momento de la clase o visualiza toda la secuencia completa</p>
+                    </div>
+                </div>
+
+                <!-- Temporizador de Aula Rápido para la Docente -->
+                <div class="flex items-center gap-2 bg-white border-2 border-[#1F3C88] px-3 py-1.5 rounded-xl no-print">
+                    <i class="fa-solid fa-stopwatch text-[#1F3C88]"></i>
+                    <span id="timer-display" class="font-black text-sm text-[#1F3C88] tabular-nums">10:00</span>
+                    <button onclick="startPauseTimer()" id="timer-toggle-btn" class="bg-[#1F3C88] text-white text-[11px] font-bold px-2.5 py-1 rounded-lg hover:bg-[#3F72AF] transition">
+                        Iniciar
+                    </button>
+                    <button onclick="resetTimerToCurrentTab()" class="bg-[#F2C94C] text-[#1F3C88] text-[11px] font-bold px-2 py-1 rounded-lg hover:bg-yellow-300 transition" title="Reiniciar reloj al tiempo de la pestaña">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botones de Navegación entre Momentos -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 no-print">
+                <button onclick="selectSequenceTab('im')" id="tab-btn-im" class="seq-tab active p-3 rounded-xl font-bold text-xs md:text-sm flex flex-col items-center justify-center gap-1">
+                    <span class="time-pill text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#3F72AF] text-white">10 minutos</span>
+                    <span>IM • Introducción Motivante</span>
+                </button>
+                <button onclick="selectSequenceTab('tp')" id="tab-btn-tp" class="seq-tab p-3 rounded-xl font-bold text-xs md:text-sm flex flex-col items-center justify-center gap-1">
+                    <span class="time-pill text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#3F72AF] text-white">20 minutos</span>
+                    <span>TP • Trabajo Personal</span>
+                </button>
+                <button onclick="selectSequenceTab('tc')" id="tab-btn-tc" class="seq-tab p-3 rounded-xl font-bold text-xs md:text-sm flex flex-col items-center justify-center gap-1">
+                    <span class="time-pill text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#3F72AF] text-white">20 minutos</span>
+                    <span>TC • Trabajo Cooperativo</span>
+                </button>
+                <button onclick="selectSequenceTab('p')" id="tab-btn-p" class="seq-tab p-3 rounded-xl font-bold text-xs md:text-sm flex flex-col items-center justify-center gap-1">
+                    <span class="time-pill text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#3F72AF] text-white">10 minutos</span>
+                    <span>P • Plenaria y Cierre</span>
+                </button>
+                <button onclick="selectSequenceTab('all')" id="tab-btn-all" class="seq-tab col-span-2 md:col-span-1 p-3 rounded-xl font-bold text-xs md:text-sm flex flex-col items-center justify-center gap-1 border-dashed">
+                    <span class="time-pill text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#F2C94C] text-[#1F3C88]">60 min Total</span>
+                    <span><i class="fa-solid fa-layer-group mr-1"></i>Ver Toda la Secuencia</span>
+                </button>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- MOMENTO 1: IM — INTRODUCCIÓN MOTIVANTE (10 MINUTOS)             -->
+            <!-- =============================================================== -->
+            <div id="panel-im" class="tab-panel block border-2 border-[#1F3C88] rounded-2xl p-5 bg-white space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 bg-[#1F3C88] text-white p-4 rounded-xl">
+                    <div>
+                        <span class="print-badge bg-[#F2C94C] text-[#1F3C88] text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase">Momento 1 • IM</span>
+                        <h3 class="text-lg md:text-xl font-extrabold mt-1">IM — Introducción Motivante: “La Caja Mágica del Espejo y los Nombres”</h3>
+                    </div>
+                    <span class="print-badge bg-white text-[#1F3C88] font-black text-xs md:text-sm px-3.5 py-1.5 rounded-xl">
+                        <i class="fa-regular fa-clock text-[#3F72AF] mr-1"></i>Duración: 10 minutos
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs md:text-sm">
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-bullseye text-[#F2C94C] mr-1.5"></i>Propósito</h4>
+                        <p data-field="im-proposito" contenteditable="true" class="text-slate-700 leading-relaxed">
+                            Activar conocimientos previos sobre las características personales, despertar la curiosidad y plantear una situación problema sobre por qué cada persona es única e irrepetible.
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-hourglass-half text-[#3F72AF] mr-1.5"></i>Distribución de los 10 Minutos</h4>
+                        <ul data-field="im-tiempo" contenteditable="true" class="text-slate-700 space-y-1 list-disc list-inside">
+                            <li><strong>Min 1–3:</strong> Dinámica del espejo sorpresa.</li>
+                            <li><strong>Min 4–7:</strong> Situación problema y preguntas generadoras.</li>
+                            <li><strong>Min 8–10:</strong> Conexión con la realidad y propósito de clase.</li>
+                        </ul>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-seedling text-[#3F72AF] mr-1.5"></i>Hábito y Evidencia</h4>
+                        <p class="text-slate-700"><strong>Hábito:</strong> <span data-field="im-habito" contenteditable="true">Ser proactivo (participación ordenada levantando la mano).</span></p>
+                        <p class="text-slate-700 mt-1"><strong>Evidencia:</strong> <span data-field="im-evidencia" contenteditable="true">Respuestas orales diagnósticas sobre su nombre, rasgos y gustos.</span></p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl border-l-4 border-[#F2C94C] bg-slate-50/70 space-y-2 text-xs md:text-sm">
+                    <h4 class="font-extrabold text-[#1F3C88]"><i class="fa-solid fa-list-ol text-[#3F72AF] mr-1.5"></i>Instrucciones Paso a Paso</h4>
+                    <ol data-field="im-pasos" contenteditable="true" class="list-decimal list-inside space-y-1.5 text-slate-800 leading-relaxed">
+                        <li><strong>El tesoro escondido (3 min):</strong> La docente presenta una caja decorada indicando que dentro está <em>“la persona más especial y única del salón”</em>. Invita a 4 estudiantes voluntarios a mirar dentro (hay un espejo de mano) sin decir en voz alta qué vieron, solo describiendo una cualidad de esa persona (ej. “tiene una sonrisa alegre”, “es buen amigo”).</li>
+                        <li><strong>Situación problema (4 min):</strong> La docente plantea el reto: <em>“Imaginen que hoy todos en Segundo Primaria tuvieran el mismo nombre, la misma cara, la misma familia y los mismos gustos. ¿Qué pasaría en nuestro colegio?”</em></li>
+                        <li><strong>Diálogo dirigido (3 min):</strong> Se escuchan respuestas y se concluye que el conjunto de rasgos, historia, nombre, gustos y cultura forma nuestra <strong>Identidad Personal</strong>. Recursos: Caja decorada, espejo de mano, pizarra y marcadores.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- MOMENTO 2: TP — TRABAJO PERSONAL (20 MINUTOS)                   -->
+            <!-- =============================================================== -->
+            <div id="panel-tp" class="tab-panel hidden border-2 border-[#3F72AF] rounded-2xl p-5 bg-white space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 bg-[#3F72AF] text-white p-4 rounded-xl">
+                    <div>
+                        <span class="print-badge bg-[#F2C94C] text-[#1F3C88] text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase">Momento 2 • TP</span>
+                        <h3 class="text-lg md:text-xl font-extrabold mt-1">TP — Trabajo Personal: “Mi Mapa de Identidad Única (Huella, Historia y Gustos)”</h3>
+                    </div>
+                    <span class="print-badge bg-white text-[#1F3C88] font-black text-xs md:text-sm px-3.5 py-1.5 rounded-xl">
+                        <i class="fa-regular fa-clock text-[#3F72AF] mr-1"></i>Duración: 20 minutos
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs md:text-sm">
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-bullseye text-[#F2C94C] mr-1.5"></i>Propósito</h4>
+                        <p data-field="tp-proposito" contenteditable="true" class="text-slate-700 leading-relaxed">
+                            Construir de manera autónoma y reflexiva una representación gráfica de su identidad personal, evitando copias mecánicas y aplicando el autoconocimiento a su historia real.
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-hourglass-half text-[#3F72AF] mr-1.5"></i>Distribución de los 20 Minutos</h4>
+                        <ul data-field="tp-tiempo" contenteditable="true" class="text-slate-700 space-y-1 list-disc list-inside">
+                            <li><strong>Min 1–3:</strong> Entrega de hoja guía y explicación de criterios.</li>
+                            <li><strong>Min 4–16:</strong> Elaboración individual del Mapa de Identidad.</li>
+                            <li><strong>Min 17–20:</strong> Revisión personal y autoverificación.</li>
+                        </ul>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-file-signature text-[#3F72AF] mr-1.5"></i>Producto y Seguimiento</h4>
+                        <p class="text-slate-700"><strong>Producto esperado:</strong> <span data-field="tp-producto" contenteditable="true">Hoja de trabajo “Mi Mapa de Identidad Única” completada con datos reales y dibujos propios.</span></p>
+                        <p class="text-slate-700 mt-1"><strong>Recursos:</strong> <span data-field="tp-recursos" contenteditable="true">Guía impresa, lápiz, crayones, cuaderno de Medio Social.</span></p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl border-l-4 border-[#1F3C88] bg-slate-50/70 space-y-2 text-xs md:text-sm">
+                    <h4 class="font-extrabold text-[#1F3C88]"><i class="fa-solid fa-list-ol text-[#3F72AF] mr-1.5"></i>Instrucciones Paso a Paso y Criterios de Seguimiento</h4>
+                    <ol data-field="tp-pasos" contenteditable="true" class="list-decimal list-inside space-y-1.5 text-slate-800 leading-relaxed">
+                        <li><strong>Centro del mapa (Autorretrato y Nombre):</strong> En el centro de su hoja, cada estudiante dibuja su rostro resaltando sus rasgos propios y escribe su nombre completo y por qué le gusta cómo lo llaman en casa.</li>
+                        <li><strong>Cuatro cuadrantes de aplicación real:</strong> Alrededor de su dibujo completa cuatro espacios con producción propia (sin copiar del pizarrón): (a) <em>Mi familia y lugar donde vivo</em>, (b) <em>Lo que mejor sé hacer (mi talento)</em>, (c) <em>Una tradición o comida favorita de mi hogar</em>, y (d) <em>Un valor que practico cada día</em>.</li>
+                        <li><strong>Criterios de seguimiento docente:</strong> La maestra recorre las filas verificando comprensión lectora de las consignas, originalidad de las respuestas, orden en el escritorio (Hábito 1) y apoyo individualizado a quienes requieran orientación.</li>
+                    </ol>
+
+                    <!-- Botón desplegable de Ejemplo de Orientación para proyectar -->
+                    <div class="pt-2 no-print">
+                        <button onclick="toggleElement('tp-guide-box')" class="bg-[#1F3C88] hover:bg-[#3F72AF] text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-2">
+                            <i class="fa-solid fa-eye text-[#F2C94C]"></i>
+                            <span>Mostrar / Ocultar Estructura Guía del Mapa Individual</span>
+                        </button>
+                        <div id="tp-guide-box" class="hidden mt-3 p-4 rounded-xl bg-white border-2 border-[#F2C94C] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div class="p-2.5 rounded-lg border border-[#3F72AF]">
+                                <strong class="text-[#1F3C88]">1. Mi Nombre e Historia:</strong> ¿Quién eligió mi nombre y qué significa para mi familia?
+                            </div>
+                            <div class="p-2.5 rounded-lg border border-[#3F72AF]">
+                                <strong class="text-[#1F3C88]">2. Mis Rasgos y Cualidades:</strong> ¿Cómo soy físicamente y qué cualidad me hace buen compañero?
+                            </div>
+                            <div class="p-2.5 rounded-lg border border-[#3F72AF]">
+                                <strong class="text-[#1F3C88]">3. Mis Raíces y Costumbres:</strong> ¿Qué celebramos o disfrutamos juntos en familia?
+                            </div>
+                            <div class="p-2.5 rounded-lg border border-[#3F72AF]">
+                                <strong class="text-[#1F3C88]">4. Mis Gustos y Metas:</strong> ¿Qué actividad disfruto aprender y qué meta tengo esta unidad?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- MOMENTO 3: TC — TRABAJO COOPERATIVO (20 MINUTOS)                -->
+            <!-- =============================================================== -->
+            <div id="panel-tc" class="tab-panel hidden border-2 border-[#1F3C88] rounded-2xl p-5 bg-white space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 bg-[#1F3C88] text-white p-4 rounded-xl">
+                    <div>
+                        <span class="print-badge bg-[#F2C94C] text-[#1F3C88] text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase">Momento 3 • TC</span>
+                        <h3 class="text-lg md:text-xl font-extrabold mt-1">TC — Trabajo Cooperativo: “Somos Diferentes, Somos un Gran Equipo”</h3>
+                    </div>
+                    <span class="print-badge bg-white text-[#1F3C88] font-black text-xs md:text-sm px-3.5 py-1.5 rounded-xl">
+                        <i class="fa-regular fa-clock text-[#3F72AF] mr-1"></i>Duración: 20 minutos
+                    </span>
+                </div>
+
+                <!-- Roles Asignados en Equipo -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                    <div class="p-3 rounded-xl border-2 border-[#3F72AF] bg-white">
+                        <span class="font-black text-[#1F3C88] block"><i class="fa-solid fa-stopwatch text-[#F2C94C] bg-[#1F3C88] p-1 rounded mr-1"></i>Rol 1: Coordinador/a</span>
+                        <p class="text-slate-700 mt-1">Cuida el tiempo de 20 min y asegura que los 4 compañeros hablen por turnos con respeto.</p>
+                    </div>
+                    <div class="p-3 rounded-xl border-2 border-[#3F72AF] bg-white">
+                        <span class="font-black text-[#1F3C88] block"><i class="fa-solid fa-pen text-[#F2C94C] bg-[#1F3C88] p-1 rounded mr-1"></i>Rol 2: Redactor/a</span>
+                        <p class="text-slate-700 mt-1">Escribe en el cuadro comparativo las semejanzas y diferencias acordadas por el equipo.</p>
+                    </div>
+                    <div class="p-3 rounded-xl border-2 border-[#3F72AF] bg-white">
+                        <span class="font-black text-[#1F3C88] block"><i class="fa-solid fa-palette text-[#F2C94C] bg-[#1F3C88] p-1 rounded mr-1"></i>Rol 3: Ilustrador/a</span>
+                        <p class="text-slate-700 mt-1">Dibuja el símbolo o escudo que representa la unión del equipo en la cartulina.</p>
+                    </div>
+                    <div class="p-3 rounded-xl border-2 border-[#3F72AF] bg-white">
+                        <span class="font-black text-[#1F3C88] block"><i class="fa-solid fa-bullhorn text-[#F2C94C] bg-[#1F3C88] p-1 rounded mr-1"></i>Rol 4: Vocero/a</span>
+                        <p class="text-slate-700 mt-1">Presenta las conclusiones del cuadro comparativo durante la plenaria de cierre.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs md:text-sm">
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-bullseye text-[#F2C94C] mr-1.5"></i>Propósito</h4>
+                        <p data-field="tc-proposito" contenteditable="true" class="text-slate-700 leading-relaxed">
+                            Contrastar identidades personales mediante el diálogo empático para descubrir semejanzas que unen y diferencias que enriquecen al grupo.
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-hourglass-half text-[#3F72AF] mr-1.5"></i>Distribución de los 20 Minutos</h4>
+                        <ul data-field="tc-tiempo" contenteditable="true" class="text-slate-700 space-y-1 list-disc list-inside">
+                            <li><strong>Min 1–3:</strong> Organización de equipos por la docente y asignación de roles.</li>
+                            <li><strong>Min 4–10:</strong> Intercambio de Mapas de Identidad por turnos.</li>
+                            <li><strong>Min 11–20:</strong> Elaboración del Cuadro Comparativo Colectivo.</li>
+                        </ul>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-people-group text-[#3F72AF] mr-1.5"></i>Producto y Criterios</h4>
+                        <p class="text-slate-700"><strong>Producto final:</strong> <span data-field="tc-producto" contenteditable="true">Cuadro comparativo en papelógrafo “Lo que nos hace únicos y lo que compartimos”.</span></p>
+                        <p class="text-slate-700 mt-1"><strong>Recursos:</strong> <span data-field="tc-recursos" contenteditable="true">Mapas individuales, pliego de papel bond/cartulina, marcadores, tarjetas de roles.</span></p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl border-l-4 border-[#F2C94C] bg-slate-50/70 space-y-2 text-xs md:text-sm">
+                    <h4 class="font-extrabold text-[#1F3C88]"><i class="fa-solid fa-list-ol text-[#3F72AF] mr-1.5"></i>Instrucciones de Trabajo Cooperativo</h4>
+                    <ol data-field="tc-pasos" contenteditable="true" class="list-decimal list-inside space-y-1.5 text-slate-800 leading-relaxed">
+                        <li><strong>Conformación intencionada:</strong> La docente organiza equipos heterogéneos de 4 integrantes (no por afinidad) y entrega las tarjetas de rol.</li>
+                        <li><strong>Ronda de escucha activa (Hábito 5):</strong> Cada integrante dispone de 1 minuto y medio para mostrar su Mapa Individual mientras sus compañeros escuchan con atención.</li>
+                        <li><strong>Construcción del Cuadro Comparativo (Hábito 6 - Sinergizar):</strong> En el pliego dividido en dos columnas, registran: Columna A: <em>“3 cosas en las que somos diferentes y nos hacen especiales”</em>; Columna B: <em>“3 cosas que compartimos como compañeros de Segundo Primaria”</em>.</li>
+                        <li><strong>Criterios de evaluación del proceso:</strong> Participación equitativa de los 4 miembros, respeto ante las diferencias, claridad del cuadro comparativo y cumplimiento de roles.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- MOMENTO 4: P — PLENARIA Y CIERRE (10 MINUTOS)                   -->
+            <!-- =============================================================== -->
+            <div id="panel-p" class="tab-panel hidden border-2 border-[#3F72AF] rounded-2xl p-5 bg-white space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 bg-[#3F72AF] text-white p-4 rounded-xl">
+                    <div>
+                        <span class="print-badge bg-[#F2C94C] text-[#1F3C88] text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase">Momento 4 • P</span>
+                        <h3 class="text-lg md:text-xl font-extrabold mt-1">P — Plenaria y Cierre: “Voces Únicas y Ticket de Salida”</h3>
+                    </div>
+                    <span class="print-badge bg-white text-[#1F3C88] font-black text-xs md:text-sm px-3.5 py-1.5 rounded-xl">
+                        <i class="fa-regular fa-clock text-[#3F72AF] mr-1"></i>Duración: 10 minutos
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs md:text-sm">
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-bullseye text-[#F2C94C] mr-1.5"></i>Propósito</h4>
+                        <p data-field="p-proposito" contenteditable="true" class="text-slate-700 leading-relaxed">
+                            Socializar los hallazgos de cada equipo, formular conclusiones colectivas sobre el respeto a la identidad y verificar el logro de aprendizaje mediante un Ticket de Salida.
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-hourglass-half text-[#3F72AF] mr-1.5"></i>Distribución de los 10 Minutos</h4>
+                        <ul data-field="p-tiempo" contenteditable="true" class="text-slate-700 space-y-1 list-disc list-inside">
+                            <li><strong>Min 1–5:</strong> Socialización breve de voceros y contraste de ideas.</li>
+                            <li><strong>Min 6–7:</strong> Conclusión grupal y retroalimentación docente.</li>
+                            <li><strong>Min 8–10:</strong> Ticket de Salida individual de verificación.</li>
+                        </ul>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[#3F72AF] bg-white">
+                        <h4 class="font-extrabold text-[#1F3C88] mb-1"><i class="fa-solid fa-ticket text-[#3F72AF] mr-1.5"></i>Recursos y Evidencia Final</h4>
+                        <p class="text-slate-700"><strong>Recursos:</strong> <span data-field="p-recursos" contenteditable="true">Murales de equipo, cinta adhesiva, tarjetas de Ticket de Salida.</span></p>
+                        <p class="text-slate-700 mt-1"><strong>Evidencia final:</strong> <span data-field="p-evidencia" contenteditable="true">Ticket de Salida completado con una conclusión y compromiso de respeto.</span></p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-xl border-l-4 border-[#1F3C88] bg-slate-50/70 space-y-3 text-xs md:text-sm">
+                    <h4 class="font-extrabold text-[#1F3C88]"><i class="fa-solid fa-list-ol text-[#3F72AF] mr-1.5"></i>Pasos de la Plenaria y Estrategia de Evaluación de Salida</h4>
+                    <ol data-field="p-pasos" contenteditable="true" class="list-decimal list-inside space-y-1.5 text-slate-800 leading-relaxed">
+                        <li><strong>Socialización en galería rápida (5 min):</strong> Los voceros presentan en 45 segundos una diferencia valiosa y una semejanza encontrada en su equipo. La docente contrasta ideas y refuerza el concepto de identidad y respeto mutuo.</li>
+                        <li><strong>Conclusión y retroalimentación (2 min):</strong> Juntos formulan la idea cierre: <em>“Todas las personas tenemos una identidad propia que merece respeto; nuestras diferencias nos enriquecen”</em>.</li>
+                        <li><strong>Estrategia de Evaluación de Salida — “Ticket de Salida: Mi Superpoder de Identidad” (3 min):</strong> Antes de salir o cambiar de período, cada estudiante completa una tarjeta breve respondiendo: (1) <em>Algo que me hace único es...</em> y (2) <em>Hoy aprendí a respetar a mis compañeros cuando...</em></li>
+                    </ol>
+
+                    <!-- Mini Verificación Interactiva de Cierre para proyectar -->
+                    <div class="mt-3 p-4 rounded-xl bg-white border-2 border-[#3F72AF] no-print">
+                        <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                            <span class="font-extrabold text-[#1F3C88] text-xs uppercase">
+                                <i class="fa-solid fa-circle-question text-[#F2C94C] bg-[#1F3C88] p-1 rounded mr-1"></i>
+                                Pregunta Rápida de Verificación en Pizarra (Plenaria)
+                            </span>
+                            <span id="quick-check-status" class="text-xs font-bold text-[#3F72AF]">Selecciona la respuesta elegida por el grupo:</span>
+                        </div>
+                        <p class="font-bold text-slate-800 text-xs md:text-sm mb-2.5">
+                            Si un compañero nuevo llega al salón con costumbres y gustos diferentes a los nuestros, ¿qué demuestra que comprendimos el tema de la identidad?
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                            <button onclick="checkPlenaryAnswer(false, this)" class="plenary-opt p-2.5 rounded-xl border border-[#3F72AF] text-left font-semibold hover:bg-slate-50 transition">
+                                A) Pedirle que cambie sus gustos para ser igual a todos.
+                            </button>
+                            <button onclick="checkPlenaryAnswer(true, this)" class="plenary-opt p-2.5 rounded-xl border border-[#3F72AF] text-left font-semibold hover:bg-slate-50 transition">
+                                B) Escucharlo con respeto, conocer su historia y compartir con él.
+                            </button>
+                            <button onclick="checkPlenaryAnswer(false, this)" class="plenary-opt p-2.5 rounded-xl border border-[#3F72AF] text-left font-semibold hover:bg-slate-50 transition">
+                                C) Ignorar sus diferencias y no incluirlo en los equipos.
+                            </button>
+                        </div>
+                        <div id="plenary-feedback" class="hidden mt-2.5 p-2.5 rounded-lg text-xs font-bold"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- 6. RECURSOS DIDÁCTICOS                                                -->
+        <!-- ===================================================================== -->
+        <section class="inst-card p-5 md:p-6">
+            <div class="flex items-center gap-2.5 border-b-2 border-[#F2C94C] pb-3 mb-4">
+                <span class="w-8 h-8 rounded-lg bg-[#1F3C88] text-[#F2C94C] flex items-center justify-center font-black text-sm">6</span>
+                <h2 class="text-base md:text-lg font-extrabold text-[#1F3C88] uppercase tracking-wide">Recursos Didácticos (Aula Presencial)</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs md:text-sm">
+                <div class="p-3 rounded-xl border border-[#3F72AF] bg-white flex items-center gap-3">
+                    <i class="fa-solid fa-box-open text-[#1F3C88] text-lg"></i>
+                    <span data-field="rec-1" contenteditable="true" class="font-semibold text-slate-800">Caja decorada y espejo de mano (IM)</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF] bg-white flex items-center gap-3">
+                    <i class="fa-solid fa-file-lines text-[#3F72AF] text-lg"></i>
+                    <span data-field="rec-2" contenteditable="true" class="font-semibold text-slate-800">Guías impresas “Mi Mapa de Identidad Única”</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF] bg-white flex items-center gap-3">
+                    <i class="fa-solid fa-book text-[#1F3C88] text-lg"></i>
+                    <span data-field="rec-3" contenteditable="true" class="font-semibold text-slate-800">Cuaderno de Medio Social, lápiz y crayones</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF] bg-white flex items-center gap-3">
+                    <i class="fa-solid fa-id-badge text-[#3F72AF] text-lg"></i>
+                    <span data-field="rec-4" contenteditable="true" class="font-semibold text-slate-800">Tarjetas didácticas de roles cooperativos</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF] bg-white flex items-center gap-3">
+                    <i class="fa-solid fa-scroll text-[#1F3C88] text-lg"></i>
+                    <span data-field="rec-5" contenteditable="true" class="font-semibold text-slate-800">Pliegos de papel bond/cartulina y marcadores</span>
+                </div>
+                <div class="p-3 rounded-xl border border-[#3F72AF] bg-white flex items-center gap-3">
+                    <i class="fa-solid fa-ticket text-[#3F72AF] text-lg"></i>
+                    <span data-field="rec-6" contenteditable="true" class="font-semibold text-slate-800">Tarjetas impresas de Ticket de Salida y pizarra</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- 7. EVALUACIÓN DEL APRENDIZAJE (TRES MOMENTOS)                         -->
+        <!-- ===================================================================== -->
+        <section class="inst-card p-5 md:p-6 space-y-4">
+            <div class="flex items-center gap-2.5 border-b-2 border-[#F2C94C] pb-3">
+                <span class="w-8 h-8 rounded-lg bg-[#1F3C88] text-[#F2C94C] flex items-center justify-center font-black text-sm">7</span>
+                <h2 class="text-base md:text-lg font-extrabold text-[#1F3C88] uppercase tracking-wide">Evaluación del Aprendizaje (Tres Momentos)</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs md:text-sm">
+                <!-- Evaluación Inicial -->
+                <div class="p-4 rounded-xl border-2 border-[#3F72AF] bg-white space-y-2">
+                    <span class="print-badge inline-block bg-[#F2C94C] text-[#1F3C88] font-black text-[11px] px-2.5 py-0.5 rounded-full uppercase">1. Evaluación Inicial (Diagnóstica)</span>
+                    <h3 class="font-extrabold text-[#1F3C88]">Durante la Introducción Motivante</h3>
+                    <p data-field="eval-inicial" contenteditable="true" class="text-slate-700 leading-relaxed">
+                        <strong>Evidencia formativa:</strong> Participación oral y respuestas a las preguntas generadoras de la caja con el espejo para identificar vocabulario previo y noción de rasgos personales.
+                    </p>
+                </div>
+
+                <!-- Evaluación Formativa -->
+                <div class="p-4 rounded-xl border-2 border-[#3F72AF] bg-white space-y-2">
+                    <span class="print-badge inline-block bg-[#3F72AF] text-white font-black text-[11px] px-2.5 py-0.5 rounded-full uppercase">2. Evaluación Formativa (Proceso)</span>
+                    <h3 class="font-extrabold text-[#1F3C88]">Durante TP y TC</h3>
+                    <p data-field="eval-formativa" contenteditable="true" class="text-slate-700 leading-relaxed">
+                        <strong>Evidencia formativa:</strong> Observación directa de la docente, preguntas de seguimiento en los escritorios durante el Mapa Individual y monitoreo del cumplimiento de roles y escucha activa en equipos.
+                    </p>
+                </div>
+
+                <!-- Evaluación Sumativa -->
+                <div class="p-4 rounded-xl border-2 border-[#1F3C88] bg-white space-y-2">
+                    <span class="print-badge inline-block bg-[#1F3C88] text-[#F2C94C] font-black text-[11px] px-2.5 py-0.5 rounded-full uppercase">3. Evaluación Sumativa (Actividad Calificada)</span>
+                    <h3 class="font-extrabold text-[#1F3C88]">Producto de Aprendizaje y Cierre</h3>
+                    <p data-field="eval-sumativa" contenteditable="true" class="text-slate-700 leading-relaxed">
+                        <strong>Actividad calificada según planificación institucional:</strong> Valoración del <em>Mapa de Identidad Única</em>, el <em>Cuadro Comparativo Cooperativo</em> y el <em>Ticket de Salida</em> mediante Lista de Cotejo (sin asignar porcentaje automático de unidad).
+                    </p>
+                </div>
+            </div>
+
+            <!-- Retroalimentación y Oportunidad de Mejora -->
+            <div class="p-4 rounded-xl border-l-4 border-[#F2C94C] bg-slate-50/70 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs md:text-sm">
+                <div>
+                    <h4 class="font-extrabold text-[#1F3C88]"><i class="fa-solid fa-comments text-[#3F72AF] mr-1.5"></i>Retroalimentación Específica</h4>
+                    <p data-field="eval-retro" contenteditable="true" class="text-slate-700 mt-1 leading-relaxed">
+                        Se brinda retroalimentación positiva inmediata destacando un rasgo o aporte concreto de cada niño y equipo (ej. <em>“Excelente forma de explicar la tradición de tu familia”</em>), evitando correcciones públicas que inhiban su expresión.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-extrabold text-[#1F3C88]"><i class="fa-solid fa-arrow-up-right-dots text-[#3F72AF] mr-1.5"></i>Oportunidad de Mejora</h4>
+                    <p data-field="eval-mejora" contenteditable="true" class="text-slate-700 mt-1 leading-relaxed">
+                        Si un estudiante tiene dificultad para expresar sus cualidades por escrito, se le permite explicarlas oralmente a la docente o completarlas mediante dibujos guiados antes de archivar su mapa en el portafolio.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- 8. INSTRUMENTO DE EVALUACIÓN INTERACTIVO (LISTA DE COTEJO)            -->
+        <!-- ===================================================================== -->
+        <section class="inst-card p-5 md:p-6 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#F2C94C] pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-lg bg-[#1F3C88] text-[#F2C94C] flex items-center justify-center font-black text-sm">8</span>
+                    <div>
+                        <h2 class="text-base md:text-lg font-extrabold text-[#1F3C88] uppercase tracking-wide">Instrumento de Evaluación Interactivo — Lista de Cotejo</h2>
+                        <p class="text-xs text-[#3F72AF] font-medium">Marca las casillas logradas para calcular automáticamente el nivel de desempeño (4 criterios • 25 pts c/u)</p>
+                    </div>
+                </div>
+                <button onclick="resetChecklistOnly()" class="no-print bg-white border-2 border-[#3F72AF] text-[#1F3C88] hover:bg-slate-50 font-bold text-xs px-3 py-1.5 rounded-xl transition">
+                    <i class="fa-solid fa-eraser mr-1"></i>Limpiar Casillas
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs md:text-sm">
+                    <thead>
+                        <tr class="bg-[#1F3C88] text-white">
+                            <th class="p-3 rounded-tl-xl">Criterios de Evaluación Alineados al Logro</th>
+                            <th class="p-3 text-center w-24">Equipo 1 / Est. A</th>
+                            <th class="p-3 text-center w-24">Equipo 2 / Est. B</th>
+                            <th class="p-3 text-center w-24">Equipo 3 / Est. C</th>
+                            <th class="p-3 text-center w-24 rounded-tr-xl">Equipo 4 / Est. D</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 border border-[#3F72AF]/40">
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3">
+                                <strong class="text-[#1F3C88]">1. Identidad Personal (TP):</strong>
+                                <span data-field="crit-1" contenteditable="true" class="text-slate-700"> Identifica y representa al menos 4 elementos reales de su identidad en su mapa individual.</span>
+                            </td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="1" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="2" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="3" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="4" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3">
+                                <strong class="text-[#1F3C88]">2. Análisis de Semejanzas y Diferencias (TC):</strong>
+                                <span data-field="crit-2" contenteditable="true" class="text-slate-700"> Contrasta con claridad rasgos únicos y compartidos en el cuadro comparativo grupal.</span>
+                            </td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="1" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="2" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="3" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="4" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3">
+                                <strong class="text-[#1F3C88]">3. Trabajo Cooperativo y Hábitos Montano:</strong>
+                                <span data-field="crit-3" contenteditable="true" class="text-slate-700"> Cumple su rol asignado, escucha con empatía (Hábito 5) y sinergiza con respeto.</span>
+                            </td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="1" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="2" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="3" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="4" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3">
+                                <strong class="text-[#1F3C88]">4. Comunicación y Ticket de Salida (Plenaria):</strong>
+                                <span data-field="crit-4" contenteditable="true" class="text-slate-700"> Expresa oralmente o por escrito una conclusión de respeto hacia la diversidad.</span>
+                            </td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="1" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="2" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="3" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                            <td class="p-3 text-center"><input type="checkbox" data-col="4" onchange="updateChecklistTotals()" class="eval-chk w-5 h-5 accent-[#1F3C88] cursor-pointer"></td>
+                        </tr>
+                        <tr class="bg-slate-100 font-extrabold text-[#1F3C88]">
+                            <td class="p-3 text-right">Resultado Calculado (Puntaje y Nivel de Logro):</td>
+                            <td class="p-3 text-center" id="res-col-1">0 / 100<br><span class="text-[11px] font-bold text-[#3F72AF]">En inicio</span></td>
+                            <td class="p-3 text-center" id="res-col-2">0 / 100<br><span class="text-[11px] font-bold text-[#3F72AF]">En inicio</span></td>
+                            <td class="p-3 text-center" id="res-col-3">0 / 100<br><span class="text-[11px] font-bold text-[#3F72AF]">En inicio</span></td>
+                            <td class="p-3 text-center" id="res-col-4">0 / 100<br><span class="text-[11px] font-bold text-[#3F72AF]">En inicio</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- 9. OBSERVACIONES Y REFLEXIÓN DOCENTE                                  -->
+        <!-- ===================================================================== -->
+        <section class="inst-card p-5 md:p-6 space-y-4">
+            <div class="flex items-center gap-2.5 border-b-2 border-[#F2C94C] pb-3">
+                <span class="w-8 h-8 rounded-lg bg-[#1F3C88] text-[#F2C94C] flex items-center justify-center font-black text-sm">9</span>
+                <h2 class="text-base md:text-lg font-extrabold text-[#1F3C88] uppercase tracking-wide">Observaciones y Reflexión Docente</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs md:text-sm">
+                <div class="space-y-1.5">
+                    <label class="font-extrabold text-[#1F3C88] block">
+                        <i class="fa-solid fa-clipboard-list text-[#3F72AF] mr-1"></i>Observaciones Durante el Desarrollo de la Sesión:
+                    </label>
+                    <div id="field-obs" data-field="observaciones" contenteditable="true" class="editable-block min-h-[84px] text-slate-700">
+                        Los estudiantes mostraron alto entusiasmo con la caja del espejo y compartieron con orgullo sus historias familiares. Se sugiere reforzar el control del tono de voz durante el intercambio en equipos.
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="font-extrabold text-[#1F3C88] block">
+                        <i class="fa-solid fa-lightbulb text-[#F2C94C] bg-[#1F3C88] p-1 rounded mr-1"></i>Reflexión Docente y Adecuaciones para la Próxima Clase:
+                    </label>
+                    <div id="field-reflexion" data-field="reflexion" contenteditable="true" class="editable-block min-h-[84px] text-slate-700">
+                        La distribución de los 60 minutos permitió completar los cuatro momentos sin prisa. Para el Plan No. 2 se integrarán los Mapas de Identidad al mural permanente del salón de Segundo Primaria.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PIE DE PÁGINA INSTITUCIONAL -->
+    <footer class="bg-[#1F3C88] text-white py-3.5 px-4 text-center text-xs mt-6">
+        <span class="font-extrabold text-[#F2C94C]">Colegio Montano</span> • Plantilla Oficial de Planificación Diaria Presencial (60 Minutos) • Área: Medio Social
+    </footer>
+
+    <script>
+        const STORAGE_KEY = 'montano_plan_diario_medio_social_v1';
+        const INITIAL_SNAPSHOT = {};
+
+        // Capturar valores iniciales para permitir reinicio limpio
+        function captureInitialState() {
+            document.querySelectorAll('[data-field]').forEach(el => {
+                INITIAL_SNAPSHOT[el.getAttribute('data-field')] = el.innerHTML;
+            });
+        }
+
+        // Mostrar notificación visual
+        function showToast(msg) {
+            const banner = document.getElementById('toast-banner');
+            const messageEl = document.getElementById('toast-message');
+            messageEl.textContent = msg;
+            banner.classList.remove('hidden');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => {
+                banner.classList.add('hidden');
+            }, 2600);
+        }
+
+        // Guardar campos editables y estado de checklist en localStorage
+        function savePlanToStorage(notify = false) {
+            try {
+                const fields = {};
+                document.querySelectorAll('[data-field]').forEach(el => {
+                    fields[el.getAttribute('data-field')] = el.innerHTML;
+                });
+
+                const checks = [];
+                document.querySelectorAll('.eval-chk').forEach((chk, index) => {
+                    checks[index] = chk.checked;
+                });
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ fields, checks }));
+                if (notify) {
+                    showToast('Planificación guardada en el navegador.');
+                }
+            } catch (e) {
+                console.warn('No se pudo guardar en localStorage:', e);
+            }
+        }
+
+        // Cargar datos guardados desde localStorage
+        function loadPlanFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (data.fields) {
+                    document.querySelectorAll('[data-field]').forEach(el => {
+                        const key = el.getAttribute('data-field');
+                        if (data.fields[key] !== undefined) {
+                            el.innerHTML = data.fields[key];
+                        }
+                    });
+                }
+                if (Array.isArray(data.checks)) {
+                    document.querySelectorAll('.eval-chk').forEach((chk, index) => {
+                        chk.checked = Boolean(data.checks[index]);
+                    });
+                }
+            } catch (e) {
+                console.warn('Error al cargar datos guardados:', e);
+            }
+        }
+
+        // Modal de confirmación para restablecer
+        function openResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmResetPlan() {
+            document.querySelectorAll('[data-field]').forEach(el => {
+                const key = el.getAttribute('data-field');
+                if (INITIAL_SNAPSHOT[key] !== undefined) {
+                    el.innerHTML = INITIAL_SNAPSHOT[key];
+                }
+            });
+            document.querySelectorAll('.eval-chk').forEach(chk => {
+                chk.checked = false;
+            });
+            updateChecklistTotals();
+            localStorage.removeItem(STORAGE_KEY);
+            closeResetModal();
+            showToast('Campos restablecidos a la plantilla original.');
+        }
+
+        // Navegación entre pestañas de la secuencia didáctica
+        let currentTab = 'im';
+        const tabDurations = { im: 10, tp: 20, tc: 20, p: 10, all: 60 };
+
+        function selectSequenceTab(tabKey) {
+            currentTab = tabKey;
+            const panels = ['im', 'tp', 'tc', 'p'];
+
+            document.querySelectorAll('.seq-tab').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('tab-btn-' + tabKey);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (tabKey === 'all') {
+                panels.forEach(p => {
+                    const panel = document.getElementById('panel-' + p);
+                    if (panel) panel.classList.remove('hidden');
+                });
+            } else {
+                panels.forEach(p => {
+                    const panel = document.getElementById('panel-' + p);
+                    if (panel) {
+                        if (p === tabKey) panel.classList.remove('hidden');
+                        else panel.classList.add('hidden');
+                    }
+                });
+            }
+
+            resetTimerToCurrentTab();
+        }
+
+        // Temporizador de aula sincronizado con la pestaña activa
+        let timerSeconds = 600;
+        let timerInterval = null;
+        let timerRunning = false;
+
+        function formatSeconds(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function resetTimerToCurrentTab() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            document.getElementById('timer-toggle-btn').textContent = 'Iniciar';
+            const mins = tabDurations[currentTab] || 10;
+            timerSeconds = mins * 60;
+            document.getElementById('timer-display').textContent = formatSeconds(timerSeconds);
+        }
+
+        function startPauseTimer() {
+            const btn = document.getElementById('timer-toggle-btn');
+            if (timerRunning) {
+                clearInterval(timerInterval);
+                timerRunning = false;
+                btn.textContent = 'Reanudar';
+            } else {
+                timerRunning = true;
+                btn.textContent = 'Pausar';
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        document.getElementById('timer-display').textContent = formatSeconds(timerSeconds);
+                    } else {
+                        clearInterval(timerInterval);
+                        timerRunning = false;
+                        btn.textContent = 'Finalizado';
+                        showToast('¡Tiempo del momento didáctico completado!');
+                    }
+                }, 1000);
+            }
+        }
+
+        // Desplegable de apoyo
+        function toggleElement(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden');
+        }
+
+        // Pregunta rápida interactiva en Plenaria
+        function checkPlenaryAnswer(isCorrect, btnEl) {
+            const feedback = document.getElementById('plenary-feedback');
+            document.querySelectorAll('.plenary-opt').forEach(b => {
+                b.classList.remove('bg-[#1F3C88]', 'text-white', 'border-[#F2C94C]', 'border-2');
+            });
+
+            btnEl.classList.add('bg-[#1F3C88]', 'text-white', 'border-[#F2C94C]', 'border-2');
+            feedback.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedback.className = 'mt-2.5 p-2.5 rounded-lg text-xs font-bold bg-[#F2C94C]/30 text-[#1F3C88] border border-[#1F3C88]';
+                feedback.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> ¡Correcto! Respetar, escuchar y compartir con quienes tienen costumbres distintas fortalece la convivencia en paz.';
+            } else {
+                feedback.className = 'mt-2.5 p-2.5 rounded-lg text-xs font-bold bg-slate-100 text-[#1F3C88] border border-[#3F72AF]';
+                feedback.innerHTML = '<i class="fa-solid fa-circle-info mr-1"></i> Reflexionemos juntos: Cada identidad es valiosa; en el Colegio Montano practicamos el respeto y la inclusión.';
+            }
+        }
+
+        // Cálculo automático de la Lista de Cotejo
+        function updateChecklistTotals() {
+            for (let col = 1; col <= 4; col++) {
+                const boxes = document.querySelectorAll(`.eval-chk[data-col="${col}"]`);
+                let checkedCount = 0;
+                boxes.forEach(b => { if (b.checked) checkedCount++; });
+                const score = checkedCount * 25;
+                let level = 'En inicio';
+                if (score === 100) level = 'Logro destacado';
+                else if (score === 75) level = 'Logro esperado';
+                else if (score === 50) level = 'En proceso';
+
+                const cell = document.getElementById(`res-col-${col}`);
+                if (cell) {
+                    cell.innerHTML = `${score} / 100<br><span class="text-[11px] font-bold text-[#3F72AF]">${level}</span>`;
+                }
+            }
+            savePlanToStorage(false);
+        }
+
+        function resetChecklistOnly() {
+            document.querySelectorAll('.eval-chk').forEach(chk => { chk.checked = false; });
+            updateChecklistTotals();
+            showToast('Casillas de evaluación limpiadas.');
+        }
+
+        // Pantalla completa
+        function toggleFullscreen() {
+            const icon = document.getElementById('fullscreen-icon');
+            const text = document.getElementById('fullscreen-text');
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    icon.classList.remove('fa-expand');
+                    icon.classList.add('fa-compress');
+                    if (text) text.textContent = 'Salir Pantalla';
+                }).catch(err => console.warn(err));
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen().then(() => {
+                    icon.classList.remove('fa-compress');
+                    icon.classList.add('fa-expand');
+                    if (text) text.textContent = 'Pantalla Completa';
+                });
+            }
+        }
+
+        // Exportar archivo HTML con los cambios actuales incorporados
+        function exportHTMLFile() {
+            // Sincronizar estado de checkboxes en el DOM antes de serializar
+            document.querySelectorAll('.eval-chk').forEach(chk => {
+                if (chk.checked) chk.setAttribute('checked', 'checked');
+                else chk.removeAttribute('checked');
+            });
+
+            const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const temaSlug = (document.getElementById('field-tema').textContent || 'plan_diario')
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9áéíóúñ]+/gi, '_');
+            a.href = url;
+            a.download = `plan_montano_${temaSlug}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Archivo HTML descargado con tus ediciones.');
+        }
+
+        // Inicialización y autoguardado al editar
+        window.onload = function () {
+            captureInitialState();
+            loadPlanFromStorage();
+            updateChecklistTotals();
+
+            document.querySelectorAll('[data-field]').forEach(el => {
+                el.addEventListener('input', () => savePlanToStorage(false));
+            });
+        };
+    </script>
+</body>
+</html>
